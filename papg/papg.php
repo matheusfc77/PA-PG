@@ -2,16 +2,6 @@
 <?php
     $tituloPagina = "PA PG - V1";
     $titulo = "Gerador de Progressões Aritméticas e Geométricas";
-    //$paragrafo1 = "Teste sua sorte com os dados! Só não vale trapacear!";
-    $dados = array(
-        0 => "imagens/default.png",
-        1 => "imagens/l1.png",
-        2 => "imagens/l2.png",
-        3 => "imagens/l3.png",
-        4 => "imagens/l4.png",
-        5 => "imagens/l5.png",
-        6 => "imagens/l6.png",
-    );
 
     $a1 = 0;
     if(isset($_GET['a1'])) {
