@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <?php
-    $tituloPagina = "PA PG - V2";
+    $tituloPagina = "PA PG - V3";
     $titulo = "Gerador de Progressões Aritméticas e Geométricas";
 
     $subtitulo1 = "Gerador de Progressões";
     $subtitulo2 = "Upload de Progressões";
+    $subtitulo3 = "Verificação de Alterações";
 
     $a1 = 0;
     if(isset($_GET['a1'])) {
@@ -23,7 +24,7 @@
 
     $tipo = "";
     if(isset($_GET['tipo'])) {
-        $tipo = $_GET['tipo'];
+        $tipo = strtoupper(trim($_GET['tipo']));
     }
 
     $file = "";
@@ -58,6 +59,12 @@
     if(isset($_GET['arquivoUpload'])) {
         $arquivoUpload= $_GET['arquivoUpload'].".json";
     }
+
+    function dados_json() {
+        $arquivo = file_get_contents($GLOBALS['arquivoUpload']);
+        $dados_arquivo = json_decode($arquivo);
+        return $dados_arquivo;
+    }
 ?>
 <html>
 <head>
@@ -77,23 +84,16 @@
         <input type="submit" name="button1" id="button1" value="Gerar Progressão!"/>
     </form>
 
-    <?php
-        foreach($progressao as $elem) {
-            echo "Elemento: ".$elem."<br>";
-        }
-    ?>
-
     <h2><?php echo $subtitulo2 ?></h2>
 
     <form action="" method="get">
-        Nome do arquivo <input type="text" name="arquivoUpload" id="arquivoUpload" value=""></input>
+        Nome do arquivo <input type="text" name="arquivoUpload" id="arquivoUpload" value="" required></input>
         <input type="submit" name="button2" id="button2" value="Upload!"/>
     </form>
     
     <?php
         if(file_exists($arquivoUpload)) {
-            $arquivo = file_get_contents($arquivoUpload);
-            $dados_arquivo = json_decode($arquivo);
+            $dados_arquivo = dados_json();
             echo "Elementos: ";
             foreach($dados_arquivo->progressao as $elem) {
                 echo $elem." ";
@@ -124,6 +124,50 @@
 
         } else {
             echo "<br>Arquivo não encontrado";
+        }
+    ?>
+
+    <h3><?php echo $subtitulo3 ?></h3>
+
+    <?php 
+        if(file_exists($arquivoUpload)) {
+            $dados_arquivo = dados_json();
+            $progressaoAux = array();
+            
+            if($dados_arquivo->tipo == "PA") {
+                for($i = 0; $i < $dados_arquivo->qtd; $i++) {
+                    $progressaoAux[$i] = $dados_arquivo->a1 + $i * $dados_arquivo->razao; 
+                }
+            } else if($dados_arquivo->tipo == "PG") {
+                for($i = 0; $i < $dados_arquivo->qtd; $i++) {
+                    $progressaoAux[$i] = $dados_arquivo->a1 * pow($dados_arquivo->razao, $i); 
+                }
+            }
+
+            $valoresAlterados = array();
+            for($i = 0; $i < $dados_arquivo->qtd; $i++) {
+                if($dados_arquivo->progressao[$i] <> $progressaoAux[$i]) {
+                    $alteracao = array(
+                        "original" => $progressaoAux[$i],
+                        "alterado" => $dados_arquivo->progressao[$i]
+                    );
+                    $valoresAlterados[$i] = $alteracao;
+                }
+            }
+
+            $qtdAlteracao = sizeof($valoresAlterados);
+            if($qtdAlteracao > 0) {
+                echo "Elementos Alterados: ";
+                foreach($valoresAlterados as $elem) {
+                    echo "<br>  Valor Original: ".$elem['original']." Alteração: ".$elem['alterado'];
+                }
+                $diferencaPercentual = number_format(($qtdAlteracao / $dados_arquivo->qtd) * 100, 2, ',');
+                $percentualIntacto = number_format((100.0 - (float)$diferencaPercentual), 2, ',');
+                echo "<br>".$diferencaPercentual."% do arquivo foi alterado. ";
+                echo $percentualIntacto."% ainda permanece como ".$dados_arquivo->tipo;
+            } else {
+                echo "Nenhuma alteração encontrada.";
+            }
         }
     ?>
 
