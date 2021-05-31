@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <?php
-    $tituloPagina = "PA PG - V3";
+    $tituloPagina = "PA PG - V4";
     $titulo = "Gerador de Progressões Aritméticas e Geométricas";
 
     $subtitulo1 = "Gerador de Progressões";
@@ -171,5 +171,38 @@
         }
     ?>
 
+    <script type="text/javascript" src="t2.json"></script>
+    
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+    <script type="text/javascript">
+        google.charts.load('current', {'packages':['corechart']});
+        google.charts.setOnLoadCallback(drawChart);
+
+        function drawChart() {
+            var data = google.visualization.arrayToDataTable([
+                ['X', 'Y'],
+                <?php 
+                    $dados_arquivo = dados_json();
+                    for($i = 0; $i < $dados_arquivo->qtd; $i++) {
+                        $valor = $dados_arquivo->progressao[$i];
+                        echo "['$i', $valor],\n";
+                    }
+                ?>
+            ]);
+
+            var options = {
+                title: 'Progressão',
+                curveType: 'function',
+                legend: { position: 'bottom' }
+            };
+
+            var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
+
+            chart.draw(data, options);
+        }
+    </script>
+
+    <div id="curve_chart" style="width: 900px; height: 500px"></div>
 </body>
 </html>
